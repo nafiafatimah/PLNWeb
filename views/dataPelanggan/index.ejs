@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Pelanggan</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table, th, td { border: 1px solid #ddd; }
+        th, td { padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        form { margin: 20px 0; }
+        input[type="text"], input[type="email"] { padding: 8px; width: 100%; }
+        input[type="submit"] { padding: 10px 20px; background-color: #007BFF; color: white; border: none; cursor: pointer; }
+        input[type="submit"]:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Form Data Pelanggan</h1>
+    <form action="/data-pelanggan" method="post">
+        <label for="IDPEL">IDPEL:</label>
+        <input type="text" id="IDPEL" name="IDPEL" required>
+        
+        <label for="Nama_Pelanggan">Nama Pelanggan:</label>
+        <input type="text" id="Nama_Pelanggan" name="Nama_Pelanggan" required>
+        
+        <label for="Email">Email:</label>
+        <input type="email" id="Email" name="Email" required>
+        
+        <label for="No_Tlf">No Telepon:</label>
+        <input type="text" id="No_Tlf" name="No_Tlf" required>
+        
+        <input type="submit" value="Submit">
+    </form>
+
+    <h2>Data Pelanggan</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>IDPEL</th>
+                <th>Nama Pelanggan</th>
+                <th>Email</th>
+                <th>No Telepon</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% data.forEach(function(item, index) { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= item.IDPEL %></td>
+                    <td><%= item.Nama_Pelanggan %></td>
+                    <td><%= item.Email %></td>
+                    <td><%= item.No_Tlf %></td>
+                    <td>
+                        <a href="/data-pelanggan/<%= item.IDPEL %>/edit">Edit</a>
+                        <form action="/data-pelanggan/<%= item.IDPEL %>?_method=DELETE" method="POST" style="display:inline;">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</body>
+</html>
