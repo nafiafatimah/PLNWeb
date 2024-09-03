@@ -16,8 +16,17 @@ const upload = multer({
 const validateDataPelanggan = [
     check('IDPEL').notEmpty().withMessage('IDPEL is required'),
     check('Nama_Pelanggan').notEmpty().withMessage('Nama Pelanggan is required'),
-    check('Email').isEmail().withMessage('Invalid Email format')
+    check('Email').custom(value => {
+        const emails = value.split(',').map(email => email.trim());
+        for (let email of emails) {
+            if (!/^\S+@\S+\.\S+$/.test(email)) {
+                throw new Error('Invalid Email format');
+            }
+        }
+        return true;
+    }).withMessage('Invalid Email format')
 ];
+
 
 // CREATE
 router.post('/', validateDataPelanggan, (req, res) => {
@@ -84,7 +93,7 @@ router.delete('/:id', (req, res) => {
 // HANDLE FILE UPLOAD AND EMAIL
 router.post('/:id/upload', upload.single('file'), (req, res) => {
     const { file, body } = req;
-    const email = body.Email; // Ambil email dari body
+    const emails = body.Email.split(',').map(email => email.trim());
     const filePath = path.join(__dirname, '../uploads', file.filename);
 
     if (!file) {
@@ -94,9 +103,9 @@ router.post('/:id/upload', upload.single('file'), (req, res) => {
     // Konfigurasi email
     const mailOptions = {
         from: process.env.EMAIL_USER,
-        to: email,
-        subject: 'Invoice',
-        text: 'Dear all...\n\nPlease find the attached file.',
+        to: emails,
+        subject: 'Invoice Tagihan Listrik',
+        text: 'Dear all...\n\nBerikut kami sampaikan invoice pelanggan bulan ini dengan data terlampir. Mohon dapat di sampaikan paling lambat tanggal 20 setiap bulannya, sebelum timbul BK (Biaya Keterlambatan) + sanksi pemutusan di tanggal 21.\n\n\ Demikian disampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih. \n\n Best Regards, \n\n Bagian Pemasaran & Pelayanan Pelanggan\n PT PLN (Persero) UP3 Gresik',
         attachments: [
             {
                 path: filePath
