@@ -59,6 +59,7 @@
                         <form action="/data-pelanggan/<%= item.IDPEL %>?_method=DELETE" method="POST" style="display:inline;">
                             <button type="submit">Delete</button>
                         </form>
+                        <a href="/data-pelanggan/<%= item.IDPEL %>/upload">Upload</a>
                     </td>
                 </tr>
             <% }); %>
@@ -66,3 +67,4 @@
     </table>
 </body>
 </html>
+    

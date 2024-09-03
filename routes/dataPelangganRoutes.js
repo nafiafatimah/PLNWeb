@@ -2,15 +2,24 @@ const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
 const dataPelangganModel = require('../models/dataPelangganModel');
+const multer = require('multer');
+const path = require('path');
+const transporter = require('../config/mailer'); // Import transporter
+
+// Konfigurasi multer untuk upload file
+const upload = multer({
+    dest: 'uploads/',
+    limits: { fileSize: 10 * 1024 * 1024 } // Maksimal 10MB
+});
 
 // Validasi input
 const validateDataPelanggan = [
     check('IDPEL').notEmpty().withMessage('IDPEL is required'),
-    check('Nama_Pelanggan').notEmpty().withMessage('Nama_Pelanggan is required'),
+    check('Nama_Pelanggan').notEmpty().withMessage('Nama Pelanggan is required'),
     check('Email').isEmail().withMessage('Invalid Email format')
 ];
 
-// CREATE - Menangani POST request
+// CREATE
 router.post('/', validateDataPelanggan, (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -19,13 +28,11 @@ router.post('/', validateDataPelanggan, (req, res) => {
 
     dataPelangganModel.createDataPelanggan(req.body, (err) => {
         if (err) return res.status(500).json({ error: err.message });
-
-        // Redirect ke halaman utama setelah sukses create
         res.redirect('/data-pelanggan');
     });
 });
 
-// READ (all) - Menangani GET request untuk menampilkan semua data
+// READ (all)
 router.get('/', (req, res) => {
     dataPelangganModel.getAllDataPelanggan((err, results) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -42,7 +49,16 @@ router.get('/:id/edit', (req, res) => {
     });
 });
 
-// UPDATE - Menangani PUT request untuk update data pelanggan
+// READ (by ID) - Menampilkan form upload
+router.get('/:id/upload', (req, res) => {
+    dataPelangganModel.getDataPelangganById(req.params.id, (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!result) return res.status(404).json({ message: 'Data Pelanggan not found' });
+        res.render('dataPelanggan/upload', { data: result });
+    });
+});
+
+// UPDATE
 router.put('/:id', validateDataPelanggan, (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -56,13 +72,43 @@ router.put('/:id', validateDataPelanggan, (req, res) => {
     });
 });
 
-
-// DELETE - Menangani DELETE request untuk menghapus data
+// DELETE
 router.delete('/:id', (req, res) => {
     dataPelangganModel.deleteDataPelanggan(req.params.id, (err, affectedRows) => {
         if (err) return res.status(500).json({ error: err.message });
         if (affectedRows === 0) return res.status(404).json({ message: 'Data Pelanggan not found' });
         res.redirect('/data-pelanggan');
+    });
+});
+
+// HANDLE FILE UPLOAD AND EMAIL
+router.post('/:id/upload', upload.single('file'), (req, res) => {
+    const { file, body } = req;
+    const email = body.Email; // Ambil email dari body
+    const filePath = path.join(__dirname, '../uploads', file.filename);
+
+    if (!file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    // Konfigurasi email
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Invoice',
+        text: 'Dear all...\n\nPlease find the attached file.',
+        attachments: [
+            {
+                path: filePath
+            }
+        ]
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            return res.status(500).json({ message: 'Failed to send email', error });
+        }
+        res.status(200).json({ message: 'File uploaded and email sent successfully' });
     });
 });
 
