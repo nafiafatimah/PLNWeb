@@ -27,85 +27,95 @@ const validateDataPelanggan = [
     }).withMessage('Invalid Email format')
 ];
 
-
 // CREATE
-router.post('/', validateDataPelanggan, (req, res) => {
+router.post('/', validateDataPelanggan, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    dataPelangganModel.createDataPelanggan(req.body, (err) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const insertId = await dataPelangganModel.createDataPelanggan(req.body);
         res.redirect('/data-pelanggan');
-    });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 });
 
 // READ (all)
-router.get('/', (req, res) => {
-    dataPelangganModel.getAllDataPelanggan((err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+router.get('/', async (req, res) => {
+    try {
+        const results = await dataPelangganModel.getAllDataPelanggan();
         res.render('dataPelanggan/index', { data: results });
-    });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 });
 
 // READ (by ID) - Menampilkan form edit
-router.get('/:id/edit', (req, res) => {
-    dataPelangganModel.getDataPelangganById(req.params.id, (err, result) => {
-        if (err) return res.status(500).json({ error: err.message });
-        if (!result) return res.status(404).json({ message: 'Data Pelanggan not found' });
+router.get('/:id/edit', async (req, res) => {
+    try {
+        const result = await dataPelangganModel.getDataPelangganById(req.params.id);
         res.render('dataPelanggan/edit', { data: result });
-    });
+    } catch (err) {
+        return res.status(err.message === 'Data not found' ? 404 : 500).json({ error: err.message });
+    }
 });
 
 // READ (by ID) - Menampilkan form upload
-router.get('/:id/upload', (req, res) => {
-    dataPelangganModel.getDataPelangganById(req.params.id, (err, result) => {
-        if (err) return res.status(500).json({ error: err.message });
-        if (!result) return res.status(404).json({ message: 'Data Pelanggan not found' });
+router.get('/:id/upload', async (req, res) => {
+    try {
+        const result = await dataPelangganModel.getDataPelangganById(req.params.id);
         res.render('dataPelanggan/upload', { data: result });
-    });
+    } catch (err) {
+        return res.status(err.message === 'Data not found' ? 404 : 500).json({ error: err.message });
+    }
 });
 
 // UPDATE
-router.put('/:id', validateDataPelanggan, (req, res) => {
+router.put('/:id', validateDataPelanggan, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    dataPelangganModel.updateDataPelanggan(req.params.id, req.body, (err, affectedRows) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const affectedRows = await dataPelangganModel.updateDataPelanggan(req.params.id, req.body);
         if (affectedRows === 0) return res.status(404).json({ message: 'Data Pelanggan not found' });
         res.redirect('/data-pelanggan');
-    });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 });
 
 // DELETE
-router.delete('/:id', (req, res) => {
-    dataPelangganModel.deleteDataPelanggan(req.params.id, (err, affectedRows) => {
-        if (err) return res.status(500).json({ error: err.message });
+router.delete('/:id', async (req, res) => {
+    try {
+        const affectedRows = await dataPelangganModel.deleteDataPelanggan(req.params.id);
         if (affectedRows === 0) return res.status(404).json({ message: 'Data Pelanggan not found' });
         res.redirect('/data-pelanggan');
-    });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 });
 
 // HANDLE FILE UPLOAD AND EMAIL
-router.post('/:id/upload', upload.single('file'), (req, res) => {
+router.post('/:id/upload', upload.single('file'), async (req, res) => {
     const { file, body } = req;
-    const emails = body.Email.split(',').map(email => email.trim());
-    const filePath = path.join(__dirname, '../uploads', file.filename);
 
     if (!file) {
         return res.status(400).json({ message: 'No file uploaded' });
     }
+
+    const emails = body.Email.split(',').map(email => email.trim());
+    const filePath = path.join(__dirname, '../uploads', file.filename);
 
     // Konfigurasi email
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: emails,
         subject: 'Invoice Tagihan Listrik',
-        text: 'Dear all...\n\nBerikut kami sampaikan invoice pelanggan bulan ini dengan data terlampir. Mohon dapat di sampaikan paling lambat tanggal 20 setiap bulannya, sebelum timbul BK (Biaya Keterlambatan) + sanksi pemutusan di tanggal 21.\n\n\ Demikian disampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih. \n\n Best Regards, \n\n Bagian Pemasaran & Pelayanan Pelanggan\n PT PLN (Persero) UP3 Gresik',
+        text: 'Dear all...\n\nBerikut kami sampaikan Invoice Pelanggan bulan ini dengan data terlampir. Mohon dapat di sampaikan paling lambat tanggal 20 setiap bulannya, sebelum timbul BK (Biaya Keterlambatan) + sanksi pemutusan di tanggal 21.\n\nDemikian disampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih. \n\nBest Regards, \n\nBagian Pemasaran & Pelayanan Pelanggan\nPT PLN (Persero) UP3 Gresik',
         attachments: [
             {
                 path: filePath
@@ -113,12 +123,12 @@ router.post('/:id/upload', upload.single('file'), (req, res) => {
         ]
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            return res.status(500).json({ message: 'Failed to send email', error });
-        }
+    try {
+        await transporter.sendMail(mailOptions);
         res.status(200).json({ message: 'File uploaded and email sent successfully' });
-    });
+    } catch (error) {
+        return res.status(500).json({ message: 'Failed to send email', error });
+    }
 });
 
-module.exports = router;
+module.exports = router; // Mengekspor router

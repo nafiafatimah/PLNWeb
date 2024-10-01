@@ -1,21 +1,18 @@
-const mysql = require('mysql');
+// config/db.js
+const mysql = require('mysql2/promise'); // Pastikan ini menggunakan mysql2/promise
 
-// Konfigurasi koneksi database
-const connection = mysql.createConnection({
+// Membuat pool koneksi
+const db = mysql.createPool({
     host: 'localhost', 
     user: 'root',      
     password: '',      
-    database: 'PLN_Web'
+    database: 'PLN_Web',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-// Membuat koneksi ke database
-connection.connect((err) => {
-    if (err) {
-        console.error('Error connecting to the database:', err);
-        return;
-    }
-    console.log('Connected to the MySQL database.');
-});
+module.exports = db; // Mengekspor pool koneksi
 
-// Mengekspos koneksi database
-module.exports = connection;
+
+
