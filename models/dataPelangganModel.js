@@ -14,7 +14,7 @@ exports.getAllDataPelanggan = async () => {
     return results; // Mengembalikan semua data pelanggan
 };
 
-// READ (by ID) - Mengambil data pelanggan berdasarkan ID
+// READ (by ID) - Mengambil data pelanggan berdasarkan IDPEL
 exports.getDataPelangganById = async (id) => {
     const query = 'SELECT * FROM Data_Pelanggan WHERE IDPEL = ?';
     const [results] = await db.query(query, [id]);
@@ -22,16 +22,23 @@ exports.getDataPelangganById = async (id) => {
     return results[0]; // Mengembalikan data pelanggan yang ditemukan
 };
 
-// UPDATE - Mengupdate data pelanggan
+// UPDATE - Mengupdate data pelanggan berdasarkan IDPEL
 exports.updateDataPelanggan = async (id, data) => {
     const query = 'UPDATE Data_Pelanggan SET Nama_Pelanggan = ?, Email = ?, No_Tlf = ? WHERE IDPEL = ?';
     const [results] = await db.query(query, [data.Nama_Pelanggan, data.Email, data.No_Tlf, id]);
     return results.affectedRows; // Mengembalikan jumlah baris yang terpengaruh
 };
 
-// DELETE - Menghapus data pelanggan
+// DELETE - Menghapus data pelanggan berdasarkan IDPEL
 exports.deleteDataPelanggan = async (id) => {
     const query = 'DELETE FROM Data_Pelanggan WHERE IDPEL = ?';
     const [results] = await db.query(query, [id]);
     return results.affectedRows; // Mengembalikan jumlah baris yang terhapus
+};
+
+// Mengecek apakah IDPEL sudah ada di database
+exports.isIDPELExist = async (IDPEL) => {
+    const query = 'SELECT COUNT(*) as count FROM Data_Pelanggan WHERE IDPEL = ?';
+    const [results] = await db.query(query, [IDPEL]);
+    return results[0].count > 0; // Mengembalikan true jika IDPEL sudah ada, false jika belum
 };
