@@ -53,11 +53,11 @@ app.get('/', (req, res) => {
 // Import routes
 const authRoutes = require('./routes/authRoutes'); 
 const dataPelangganRoutes = require('./routes/dataPelangganRoutes');
-
+const dataPelangganController = require('./controllers/dataPelanggan');
 // Gunakan rute
 app.use('/auth', authRoutes); // Auth route
 app.use('/data-pelanggan', dataPelangganRoutes); 
-
+app.get('/data-pelanggan', dataPelangganController.renderDataPelanggan);
 // Jalankan server pada port 3000
 const port = process.env.PORT || 3000; 
 app.listen(port, () => {

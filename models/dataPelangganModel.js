@@ -1,3 +1,5 @@
+// models/dataPelanggan.js
+
 const db = require('../config/db'); // Mengimpor koneksi database
 
 // CREATE - Menambahkan data pelanggan
@@ -41,4 +43,11 @@ exports.isIDPELExist = async (IDPEL) => {
     const query = 'SELECT COUNT(*) as count FROM Data_Pelanggan WHERE IDPEL = ?';
     const [results] = await db.query(query, [IDPEL]);
     return results[0].count > 0; // Mengembalikan true jika IDPEL sudah ada, false jika belum
+};
+
+// Mencari data pelanggan berdasarkan nama
+exports.searchDataPelanggan = async (query) => {
+    const sql = 'SELECT * FROM Data_Pelanggan WHERE Nama_Pelanggan LIKE ?';
+    const [results] = await db.query(sql, [`%${query}%`]); // Menambahkan wildcard untuk pencarian
+    return results; // Mengembalikan hasil pencarian
 };

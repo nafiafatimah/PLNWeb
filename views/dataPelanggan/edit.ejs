@@ -1,33 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Data Pelanggan</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        form { margin: 20px 0; }
-        input[type="text"], input[type="email"] { padding: 8px; width: 100%; }
-        input[type="submit"] { padding: 10px 20px; background-color: #007BFF; color: white; border: none; cursor: pointer; }
-        input[type="submit"]:hover { background-color: #0056b3; }
-    </style>
-</head>
-<body>
-    <h1>Edit Data Pelanggan</h1>
-    <form action="/data-pelanggan/<%= data.IDPEL %>?_method=PUT" method="POST">
-        <label for="IDPEL">IDPEL:</label>
-        <input type="text" id="IDPEL" name="IDPEL" value="<%= data.IDPEL %>" readonly>
+
+<%- include('../partials/header.ejs', { q: '' }) %>
+<body id="page-top">
+
+    <div id="wrapper">
+        <%- include('../partials/sidebar.ejs', { q: '' }) %>
         
-        <label for="Nama_Pelanggan">Nama Pelanggan:</label>
-        <input type="text" id="Nama_Pelanggan" name="Nama_Pelanggan" value="<%= data.Nama_Pelanggan %>" required>
-        
-        <label for="Email">Email:</label>
-        <input type="email" id="Email" name="Email" value="<%= data.Email %>" required>
-        
-        <label for="No_Tlf">No Telepon:</label>
-        <input type="text" id="No_Tlf" name="No_Tlf" value="<%= data.No_Tlf %>" required>
-        
-        <input type="submit" value="Update">
-    </form>
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <%- include('../partials/topbar.ejs', { q: '' }) %>
+
+                <div class="container-fluid">
+                    <h1 class="h3 mb-4 text-gray-800">Edit Data Pelanggan</h1>
+
+                    <form action="/data-pelanggan/<%= data.IDPEL %>?_method=PUT" method="POST">
+                        <div class="form-group">
+                            <label for="IDPEL">IDPEL:</label>
+                            <input type="text" id="IDPEL" name="IDPEL" class="form-control" value="<%= data.IDPEL %>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="Nama_Pelanggan">Nama Pelanggan:</label>
+                            <input type="text" id="Nama_Pelanggan" name="Nama_Pelanggan" class="form-control" value="<%= data.Nama_Pelanggan %>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="Email">Email:</label>
+                            <input type="text" id="Email" name="Email" class="form-control" value="<%= data.Email %>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="No_Tlf">No Telepon:</label>
+                            <input type="tel" id="No_Tlf" name="No_Tlf" class="form-control" value="<%= data.No_Tlf %>" required>
+                        </div>
+                        <input type="submit" value="Update" class="btn btn-primary">
+                    </form>
+                </div>
+            </div>
+
+            <%- include('../partials/footer.ejs', { q: '' }) %>
+        </div>
+    </div>
+
+    <%- include('../partials/all_javascript.ejs', { q: '' }) %>
 </body>
 </html>

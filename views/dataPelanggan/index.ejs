@@ -32,8 +32,14 @@
                         </button>
                     </div>
 
+
+
                     <!-- Tabel Data Pelanggan -->
-                    <h2>Daftar Pelanggan</h2>
+                    
+                    <% if (q) { %>
+                        <p>Hasil pencarian untuk "<%= q %>":</p>
+                    <% } %>
+                    
                     <table class="table table-bordered">
                         <thead>
                             <tr>
@@ -46,22 +52,28 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% data.forEach(function(item, index) { %>
+                            <% if (data.length > 0) { %>
+                                <% data.forEach(function(item, index) { %>
+                                    <tr>
+                                        <td><%= index + 1 %></td>
+                                        <td><%= item.IDPEL %></td>
+                                        <td><%= item.Nama_Pelanggan %></td>
+                                        <td><%= item.Email %></td>
+                                        <td><%= item.No_Tlf %></td>
+                                        <td>
+                                            <a href="/data-pelanggan/<%= item.IDPEL %>/edit" class="btn btn-warning">Edit</a>
+                                            <form action="/data-pelanggan/<%= item.IDPEL %>?_method=DELETE" method="POST" style="display:inline;">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                            <a href="/data-pelanggan/<%= item.IDPEL %>/upload" class="btn btn-info">Upload</a>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
                                 <tr>
-                                    <td><%= index + 1 %></td>
-                                    <td><%= item.IDPEL %></td>
-                                    <td><%= item.Nama_Pelanggan %></td>
-                                    <td><%= item.Email %></td>
-                                    <td><%= item.No_Tlf %></td>
-                                    <td>
-                                        <a href="/data-pelanggan/<%= item.IDPEL %>/edit" class="btn btn-warning">Edit</a>
-                                        <form action="/data-pelanggan/<%= item.IDPEL %>?_method=DELETE" method="POST" style="display:inline;">
-                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                        </form>
-                                        <a href="/data-pelanggan/<%= item.IDPEL %>/upload" class="btn btn-info">Upload</a>
-                                    </td>
+                                    <td colspan="6" class="text-center">Data tidak ditemukan.</td>
                                 </tr>
-                            <% }); %>
+                            <% } %>
                         </tbody>
                     </table>
 
@@ -137,5 +149,4 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
 </body>
-
 </html>
