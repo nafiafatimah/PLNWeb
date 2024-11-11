@@ -2,7 +2,7 @@ const dataPelangganModel = require('../models/dataPelangganModel');
 const { validationResult } = require('express-validator');
 const fs = require('fs');
 const path = require('path');
-const transporter = require('../config/mailer'); // Import the transporter for sending emails
+const transporter = require('../config/mailer'); // Import transporter untuk mengirim email
 
 // Render halaman data pelanggan
 exports.renderDataPelanggan = async (req, res) => {
@@ -35,7 +35,7 @@ exports.addDataPelanggan = async (req, res) => {
             return res.status(400).json({ message: 'IDPEL already exists' });
         }
 
-        const insertId = await dataPelangganModel.createDataPelanggan(req.body);
+        await dataPelangganModel.createDataPelanggan(req.body);
         res.redirect('/data-pelanggan'); // Redirect setelah berhasil
     } catch (err) {
         console.error(err);
@@ -98,7 +98,7 @@ exports.deleteDataPelanggan = async (req, res) => {
 exports.renderUploadForm = async (req, res) => {
     try {
         const result = await dataPelangganModel.getDataPelangganById(req.params.id);
-        res.render('dataPelanggan/upload', { data: result }); // Render upload view with customer data
+        res.render('dataPelanggan/upload', { data: result }); // Render upload view dengan data pelanggan
     } catch (err) {
         console.error(err);
         return res.status(err.message === 'Data not found' ? 404 : 500).json({ error: err.message });
@@ -107,7 +107,7 @@ exports.renderUploadForm = async (req, res) => {
 
 // Upload file dan kirim email
 exports.uploadFilesAndSendEmail = async (req, res) => {
-    const { files } = req; // Assuming 'files' is populated by multer or similar middleware
+    const { files } = req; // Pastikan 'files' diisi oleh middleware multer
     if (!files || files.length === 0) {
         return res.status(400).json({ message: 'No files uploaded' });
     }
@@ -117,7 +117,9 @@ exports.uploadFilesAndSendEmail = async (req, res) => {
         const email = customer.Email;
 
         const attachments = files.map(file => ({
-            path: path.join(__dirname, '../uploads', file.filename)
+            filename: file.originalname, // Nama asli file untuk attachment
+            path: path.join(__dirname, '../uploads', file.filename),
+            contentType: 'application/pdf' // Tipe konten ditentukan sebagai PDF
         }));
 
         const mailOptions = {
@@ -128,10 +130,12 @@ exports.uploadFilesAndSendEmail = async (req, res) => {
             attachments: attachments
         };
 
+        console.log("Sending email with attachments:", attachments);
+
         await transporter.sendMail(mailOptions);
         res.status(200).json({ message: 'Files uploaded and email sent successfully' });
     } catch (error) {
-        console.error(error);
+        console.error("Error sending email:", error);
         return res.status(500).json({ message: 'Failed to send email', error });
     }
 };
