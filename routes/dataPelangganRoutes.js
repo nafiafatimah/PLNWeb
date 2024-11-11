@@ -15,7 +15,7 @@ const validateDataPelanggan = [
     check('IDPEL').notEmpty().withMessage('IDPEL is required'),
     check('Nama_Pelanggan').notEmpty().withMessage('Nama Pelanggan is required'),
     check('Email').custom(value => {
-        const emails = value.split(',').map(email => email.trim());
+        const emails = value.split(';').map(email => email.trim());
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         for (let email of emails) {
